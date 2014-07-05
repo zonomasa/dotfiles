@@ -10,6 +10,15 @@
 (unless (server-running-p)
   (server-start))
 
+(setenv "LANG" "C")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Send key type data to fluentd
+;; (defun my-insert-hook ()                                                                                                                                                ;;
+;;   (start-process "post-fluent" nil "curl" "--noproxy" "localhost" "-X" "POST" "-d" (concat "json={\"mode\":\"" (symbol-name major-mode) "\"}") "localhost:8764/emacs")) ;;
+;; (add-hook 'post-self-insert-hook 'my-insert-hook)                                                                                                                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;--------------------------------------------------------------------------------
 ;; Org-mode
 ;;--------------------------------------------------------------------------------
@@ -32,15 +41,6 @@
       (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
               (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
 
-(setq org-todo-keyword-faces
-      (quote (("TODO" :foreground "red" :weight bold)
-              ("NEXT" :foreground "blue" :weight bold)
-              ("DONE" :foreground "forest green" :weight bold)
-              ("WAITING" :foreground "orange" :weight bold)
-              ("HOLD" :foreground "magenta" :weight bold)
-              ("CANCELLED" :foreground "forest green" :weight bold)
-              ("MEETING" :foreground "forest green" :weight bold)
-              ("PHONE" :foreground "forest green" :weight bold))))
 
 
 ;; To change the state by C-c C-t KEY
@@ -80,23 +80,25 @@
 
 (setq org-capture-templates
       (quote (("t" "todo" entry (file "~/org/refile.org")
-               "* TODO %?\n%U\n")
+               "* TODO %?\n\n")
               ("s" "mm todo" entry (file "~/org/refile.org")
-               "* TODO %? :MM:\n%U\n")
+               "* TODO %? :MM:\n\n")
              ("r" "respond" entry (file "~/org/refile.org")
-               "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n")
+               "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n\n")
               ("n" "note" entry (file "~/org/refile.org")
-               "* %? :NOTE:\n%U\n")
+               "* %? :NOTE:\n\n")
               ("j" "Journal" entry (file+datetree "~/org/journal.org")
-               "* %?\n%U\n")
+               "* %?\n\n")
               ("w" "org-protocol" entry (file "~/org/refile.org")
-               "* TODO Review %c\n%U\n")
+               "* TODO Review %c\n\n")
               ("m" "Meeting" entry (file "~/org/refile.org")
-               "* MEETING with %? :MEETING:\n%U")
-              ("p" "Phone call" entry (file "~/org/refile.org")
-               "* PHONE %? :PHONE:\n%U")
+               "* MEETING with %? :MEETING:\n")
+;;              ("p" "Phone call" entry (file "~/org/refile.org")
+;;               "* PHONE %? :PHONE:\n")
+              ("i" "Idea " entry (file+datetree "~/org/idea.org")
+               "* IDEA %? :IDEA:\n")
               ("h" "Habit" entry (file "~/org/refile.org")
-               "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+               "* NEXT %?\n\n%a\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
 
 (setq org-refile-targets (quote (("gtd.org" :maxlevel . 1) 
                              ("someday.org" :level . 2))))
@@ -104,7 +106,7 @@
 ;;--------------------------------------------------------------------------------
 ;; scratchの初期メッセージ
 ;;--------------------------------------------------------------------------------
-(setq initial-scratch-message "HOGE HUGO")
+(setq initial-scratch-message "Done is better than perfect, datte.")
 
 ;;--------------------------------------------------------------------------------
 ;; Package manager
@@ -121,6 +123,34 @@
        (expand-file-name "~/.emacs.d/elisp/")
        )
        load-path))
+
+
+(setq my-packages
+      '(
+    zenburn-theme
+    yasnippet
+    wgrep
+    tabbar
+    popwin
+    popup
+    markdown-mode
+    elscreen
+    dropdown-list
+    color-moccur
+    cmake-mode
+    c-eldoc
+    auto-install
+    auto-complete
+    anything
+;    gtags
+    ))
+
+(require 'cl)
+(mapcar (lambda (x)
+          (when (not (package-installed-p x))
+            (package-install x)))
+        my-packages)
+
 
 (require 'auto-install)
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/auto-install/"))
@@ -199,6 +229,7 @@
  '(inhibit-startup-screen t)
  '(make-backup-files nil)
  '(menu-bar-mode nil)
+ '(org-agenda-files (quote ("~/org/gtd.org_archive" "/home/tatezono/org/gtd.org" "/home/tatezono/org/idea.org" "/home/tatezono/org/journal.org" "/home/tatezono/org/refile.org")))
  '(scroll-bar-mode nil)
  '(show-paren-mode t)
  '(tool-bar-mode nil)
@@ -271,12 +302,17 @@
 (add-hook 'find-file-hooks '(lambda ()
                               (if font-lock-mode nil (font-lock-mode t))))
 
+;; 貼り付けた後インデントを行う
+(global-set-key [?\C-\S-y] (lambda ()
+                             (interactive)
+                             (yank)
+                             (indent-region (region-beginning) (region-end))))
 
 ;;--------------------------------------------------------------------------------
 ;; auto-complete
 ;;--------------------------------------------------------------------------------
 (require 'auto-complete)
-(require 'auto-complete-config)
+(require 'auto-complete-config)    ; 必須ではないですが一応
 (global-auto-complete-mode t)
 (setq ac-use-menu-map t)           ;補完候補をC-n/C-p で選択
 
@@ -324,8 +360,8 @@
 ;; 詳細は http://www.bookshelf.jp/soft/meadow_50.html#SEC751
 (setq moccur-split-word t)
 ;; migemoがrequireできる環境ならmigemoを使う
-(when (require 'migemo nil t) ;第三引数がnon-nilだとloadできなかった場合にエラーではなくnilを返す
-  (setq moccur-use-migemo t))
+;;(when (require 'migemo nil t) ;第三引数がnon-nilだとloadできなかった場合にエラーではなくnilを返す
+;;  (setq moccur-use-migemo t))
 
 ;;; anything-c-moccurの設定
 (require 'anything-c-moccur)
@@ -452,7 +488,6 @@
 (global-hi-lock-mode 1)
 (require 'wgrep nil t)
 
-
 ;;--------------------------------------------------------------------------------
 ;; anything
 ;;--------------------------------------------------------------------------------
@@ -466,14 +501,6 @@
     (interactive)
     (anything '(anything-c-source-emacs-commands))))
 (setq anything-idle-delay 0.1)
-
-
-
-;;--------------------------------------------------------------------------------
-;; PHP 設定
-;;--------------------------------------------------------------------------------
-(add-to-list 'load-path
-             (expand-file-name "~/.emacs.d/elpa/php-mode-20130609.1603/'"))
 
 
 ;;--------------------------------------------------------------------------------
@@ -623,23 +650,28 @@
 (setq flymake-log-level 3)
 
 ;; c-mode に登録
-(add-hook 'c-mode-hook
-          (lambda ()
+;(add-hook 'c-mode-hook
+;          (lambda ()
 ;            (flymake-mode t)
-            ))
+;            ))
 
-(defun flymake-get-make-cmdline (source base-dir)
-  (list "make"
-        (list "PCLINUX=yes" "-s" "-C"
-              base-dir
-              (concat "CHK_SOURCES=" source)
-              "SYNTAX_CHECK_MODE=1"
-              "check_syntax")))
+ (defun flymake-get-make-cmdline (source base-dir)
+   (list "make"
+         (list  "PCLINUX=yes" "-C"
+                (concat base-dir "src")
+               (concat "CHK_SOURCES=../" source)
+;;               "SYNTAX_CHECK_MODE=1"
+               "check-syntax")))
+
+
+(defadvice flymake-post-syntax-check (before flymake-force-check-was-interrupted)
+  (setq flymake-check-was-interrupted t))
+(ad-activate 'flymake-post-syntax-check)
 
 ;;エラーメッセージをミニバッファで表示させる
 (global-set-key "\M-n" 'flymake-goto-next-error)
 (global-set-key "\M-p" 'flymake-goto-prev-error)
-;(setq flymake-run-in-place nil)
+(setq flymake-run-in-place nil)
 (setq flymake-run-in-place t)
 ;; gotoした際にエラーメッセージをminibufferに表示する
 (defun display-error-message ()
@@ -688,52 +720,56 @@
 ;;--------------------------------------------------------------------------------
 ;; GNU global(gtags.el)
 ;;--------------------------------------------------------------------------------
-(require 'gtags)
-(require 'anything-gtags)
-(setq gtags-path-style 'relative)
-(global-set-key "\M-t" 'gtags-find-tag)     ;関数の定義元へ
-(global-set-key "\M-r" 'gtags-find-rtag)    ;関数の参照先へ
-(global-set-key "\M-s" 'gtags-find-symbol)  ;変数の定義元/参照先へ
-;(global-set-key "\M-f" 'gtags-find-file)   ;ファイルにジャンプ
-(global-set-key "\C-t" 'gtags-pop-stack)   ;前のバッファに戻る
-(global-set-key "\C-cf" 'gtags-parse-file2)   ;前のバッファに戻る
-(add-hook 'c-mode-common-hook
-          '(lambda ()
-             (gtags-mode 1)))
+(when (require 'gtags nil t)
+  (require 'anything-gtags)
+  (setq gtags-path-style 'relative)
+  (global-set-key "\M-t" 'gtags-find-tag)     ;関数の定義元へ
+  (global-set-key "\M-r" 'gtags-find-rtag)    ;関数の参照先へ
+  (global-set-key "\M-s" 'gtags-find-symbol)  ;変数の定義元/参照先へ
+                                        ;(global-set-key "\M-f" 'gtags-find-file)   ;ファイルにジャンプ
+  (global-set-key "\C-t" 'gtags-pop-stack)   ;前のバッファに戻る
+  (global-set-key "\C-cf" 'gtags-parse-file2)   ;前のバッファに戻る
+  (add-hook 'c-mode-common-hook
+            '(lambda ()
+               (gtags-mode 1)))
 
-;; update GTAGS
-(defun update-gtags (&optional prefix)
-  (interactive "P")
-  (let ((rootdir (gtags-get-rootpath))
-        (args (if prefix "-v" "-iv")))
-    (when rootdir
-      (let* ((default-directory rootdir)
-             (buffer (get-buffer-create "*update GTAGS*")))
-        (save-excursion
-          (set-buffer buffer)
-          (erase-buffer)
-          (let ((result (process-file "gtags" nil buffer nil args)))
-            (if (= 0 result)
-                (message "GTAGS successfully updated.")
-              (message "update GTAGS error with exit status %d" result))))))))
-(add-hook 'after-save-hook 'update-gtags)
-
-(defun gtags-parse-file2 ()
-  (interactive)
-  (if (gtags-get-rootpath)
-      (let*
-          ((root (gtags-get-rootpath))
-           (path (buffer-file-name))
-           (gtags-path-style 'root)
-           (gtags-rootdir root))
-        (if (string-match (regexp-quote root) path)
-            (gtags-goto-tag
-             (replace-match "" t nil path)
-             "f" nil)
-          ;; delegate to gtags-parse-file
-          (gtags-parse-file)))
-    ;; delegate to gtags-parse-file
-    (gtags-parse-file)))
+  ;; update GTAGS
+  (defun update-gtags (&optional prefix)
+    (interactive "P")
+    (let ((rootdir (gtags-get-rootpath))
+          (args (if prefix "-v" "-iv")))
+      (when rootdir
+        (let* ((default-directory rootdir)
+               (buffer (get-buffer-create "*update GTAGS*")))
+          (save-excursion
+            (set-buffer buffer)
+            (erase-buffer)
+            (let ((result (process-file "gtags" nil buffer nil args)))
+              (if (= 0 result)
+                  (message "GTAGS successfully updated.")
+                (message "update GTAGS error with exit status %d" result))))))))
+  (add-hook 'after-save-hook 'update-gtags)
+  (defun gtags-parse-file2 ()
+    (interactive)
+    (if (gtags-get-rootpath)
+        (let*
+            ((root (gtags-get-rootpath))
+             (path (buffer-file-name))
+             (gtags-path-style 'root)
+             (gtags-rootdir root))
+          (if (string-match (regexp-quote root) path)
+              (gtags-goto-tag
+               (replace-match "" t nil path)
+               "f" nil)
+            ;; delegate to gtags-parse-file
+            (gtags-parse-file)))
+      ;; delegate to gtags-parse-file
+      (gtags-parse-file)))
+)
+;;--------------------------------------------------------------------------------
+;; Markdown-mode
+;;--------------------------------------------------------------------------------
+(setq auto-mode-alist (cons '("\\.md" . gfm-mode) auto-mode-alist))
 
 ;;--------------------------------------------------------------------------------
 ;; 独自変数の定義
@@ -743,7 +779,7 @@
 (defvar my-face-todo 'my-face-todo)
 (defface my-face-zenkaku-s '((t (:background "medium aquamarine"))) nil)
 (defvar my-face-zenkaku-s 'my-face-zenkaku-s)
-(defface my-face-tab '((t (:foreground "medium aquamarine" :underline t))) nil)
+(defface my-face-tab '((t (:foreground "gray40" :underline t))) nil)
 (defvar my-face-tab 'my-face-tab)
 (defface my-face-endspace '((t (:background "coral1"))) nil)
 (defvar my-face-endspace 'my-face-endspace)
@@ -771,3 +807,43 @@
                                     nil
                                   (font-lock-mode t))))
 )
+
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+
+
+;; https://github.com/narusemotoki/.emacs.d/tree/master/elisp/ac-mozc
+(require 'ac-mozc)
+(define-key ac-mode-map (kbd "C-c C-SPC") 'ac-mozc-complete)
+(require 'org)
+(add-to-list 'ac-modes 'org-mode)
+(add-hook 'org-mode-hook 
+      (lambda ()
+            (delete 'ac-source-words-in-same-mode-buffers ac-sources)
+            (add-to-list 'ac-sources 'ac-source-mozc)
+            (set (make-local-variable 'ac-auto-show-menu) 0.01)))
+
+
+
+(require 'multi-term)
+(setq multi-term-program shell-file-name)
+(add-to-list 'term-unbind-key-list '"M-x")
+(add-hook 'term-mode-hook
+         '(lambda ()
+            ;; C-h を term 内文字削除にする
+            (define-key term-raw-map (kbd "C-h") 'term-send-backspace)
+            ;; C-y を term 内ペーストにする
+            (define-key term-raw-map (kbd "C-y") 'term-paste)
+            ))
+(global-set-key (kbd "C-c t") '(lambda ()
+                                (interactive)
+                                (multi-term)))
+
+(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)

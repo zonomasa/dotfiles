@@ -14,6 +14,11 @@ if [ -e "$HOME/.rvm" ];then
     PATH=$HOME/.rvm/bin:$PATH # Add RVM to PATH for scripting
 fi
 
+export PERL_CPANM_OPT="--local-lib=~/perl5"
+export PATH=$HOME/perl5/bin:$PATH;
+export PERL5LIB=$HOME/perl5/lib/perl5:$PERL5LIB;
+
+
 ## 印刷コマンド
 #
 #alias PRINT='enscript --pretty-print --line-numbers --columns=2 --landscape --fancy-header'

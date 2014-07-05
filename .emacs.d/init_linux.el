@@ -1,5 +1,3 @@
-; -*- Mode: Emacs-Lisp ; Coding: utf-8 -*-
-
 (set-face-attribute 'default nil
                    :family "Ricty"
                    :height 120)
@@ -14,6 +12,7 @@
 ;; $ sudo apt-get install emacs-mozc emacs-mozc-bin
 (setq header-line-format nil)
 (define-key global-map (kbd "C-;") 'toggle-input-method)
+(define-key global-map (kbd "<hiragana-katakana>") 'toggle-input-method)
 (when (require 'mozc nil t)
   (set-language-environment "Japanese")
   (setq default-input-method "japanese-mozc")

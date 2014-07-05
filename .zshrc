@@ -84,26 +84,34 @@ function _update_vcs_info_msg() {
 }
 add-zsh-hook precmd _update_vcs_info_msg
 
+if [ "$EMACS" ];then
+    # Emacs 内で起動した時の処理
+    PROMPT='['$RED'%n'$GREEN'@'$RED'%m '$GREEN'%~'$DEFAULT']
+ %{%}%b' &&
+    # 右側に出すプロンプト
+    RPROMPT=
+else
+    # Terminal から起動した時の処理
 
 # プロンプトのフォーマット
 # rootとそれ以外で分けるcase文
-case ${UID} in
-    0)
-        PROMPT='['$RED'ROOT '$BROWN'%~'$DEFAULT']
+    case ${UID} in
+        0)
+            PROMPT='['$RED'ROOT '$BROWN'%~'$DEFAULT']
 $ %{%}%b' &&
-        ;;
-    *)
-        PROMPT='['$RED'%n'$GREEN'@'$RED'%m '$GREEN'%~'$DEFAULT']
+            ;;
+        *)
+            PROMPT='['$RED'%n'$GREEN'@'$RED'%m '$GREEN'%~'$DEFAULT']
 $ %{%}%b' &&
-        ;;
-esac
+            ;;
+    esac
+    # 右側に出すプロンプト
+    RPROMPT="%1(v|%F{green}%1v%f|) --%W %T--"
+
+fi
 
 # コマンド修正時の確認メッセージ
 SPROMPT="correct: %R -> %r ? " 
-
-# 右側に出すプロンプト
-RPROMPT="%1(v|%F{green}%1v%f|) --%W %T--"
-
 
 # 補完機能
 autoload -Uz compinit

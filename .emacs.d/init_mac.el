@@ -1,10 +1,9 @@
-; -*- Mode: Emacs-Lisp ; Coding: utf-8 -*-
 ;;--------------------------------------------------------------------------------
 ;; キー設定
 ;;--------------------------------------------------------------------------------
 ;; CmdとOptの入れ替え
-;;(setq ns-command-modifier (quote meta))
-;;(setq ns-alternate-modifier (quote super))
+(setq ns-command-modifier (quote meta))
+(setq ns-alternate-modifier (quote super))
 
 (setq default-input-method "MacOSX")
 
@@ -47,7 +46,7 @@
 
 (set-face-attribute 'default nil
                    :family "Ricty"
-                   :height 140)
+                   :height 160)
 (set-fontset-font
  nil 'japanese-jisx0208
  (font-spec :family "Ricty"))
