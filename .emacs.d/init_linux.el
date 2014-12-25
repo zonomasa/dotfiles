@@ -1,9 +1,10 @@
+(when window-system
 (set-face-attribute 'default nil
                    :family "Ricty"
                    :height 120)
 (set-fontset-font
  nil 'japanese-jisx0208
- (font-spec :family "Ricty"))
+   (font-spec :family "Ricty")))
 
 ;;(add-to-list 'default-frame-alist '(font . "Ricty-13"))
 

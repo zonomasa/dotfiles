@@ -2,15 +2,15 @@
 
 ;; マウスの右クリックの割り当て(押しながらの操作)をはずす
 (if window-system (progn
-	    (global-unset-key [down-mouse-3])
+                    (global-unset-key [down-mouse-3])
 ;; マウスの右クリックメニューを使えるようにする
 (defun bingalls-edit-menu (event)  (interactive "e")
-	(popup-menu menu-bar-edit-menu))
-	(global-set-key [mouse-3] 'bingalls-edit-menu)))
-
+  (popup-menu menu-bar-edit-menu))
+  (global-set-key [mouse-3] 'bingalls-edit-menu)))
 
 (global-set-key [M-kanji] 'ignore)
 (global-set-key [kanji] 'ignore)
+
 
 ;; ------------------------------------------------------------------------
 ;; @ coding system

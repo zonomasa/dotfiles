@@ -12,12 +12,6 @@
 
 (setenv "LANG" "C")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Send key type data to fluentd
-;; (defun my-insert-hook ()                                                                                                                                                ;;
-;;   (start-process "post-fluent" nil "curl" "--noproxy" "localhost" "-X" "POST" "-d" (concat "json={\"mode\":\"" (symbol-name major-mode) "\"}") "localhost:8764/emacs")) ;;
-;; (add-hook 'post-self-insert-hook 'my-insert-hook)                                                                                                                       ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;--------------------------------------------------------------------------------
 ;; Org-mode
@@ -26,7 +20,7 @@
 
 (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
 (require 'org)
-;;
+
 ;; Standard key bindings
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
@@ -36,11 +30,22 @@
 ;; List of org files
 (setq org-agenda-files (quote ("~/org/")))
 
-
 (setq org-todo-keywords
       (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-              (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
+              (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING" "MAIL"))))
 
+
+(setq org-todo-keyword-faces
+      (quote (
+              ;;("TODO" :foreground "red" :weight bold)
+              ("NEXT" :foreground "cyan" :weight bold)
+              ("DONE" :foreground "forest green" :weight bold)
+              ("WAITING" :foreground "orange" :weight bold)
+              ("HOLD" :foreground "magenta" :weight bold)
+              ("CANCELLED" :foreground "forest green" :weight bold)
+              ("MEETING" :foreground "forest green" :weight bold)
+              ("MAIL" :foreground "magenta" :weight bold)
+              ("PHONE" :foreground "magenta" :weight bold))))
 
 
 ;; To change the state by C-c C-t KEY
@@ -71,18 +76,16 @@
                 (tags-todo "NA")
                 (tags-todo "MONEY")
                 (tags-todo "READING")))
-              (" " "(Office)Agenda and Lists with context"
-               ((agenda)
-                (tags-todo "MM")
-                (tags-todo "BS")
+                ("O" "(Office)Agenda and Lists with context"
+                ((agenda)
+                (tags-todo "SMM")
+                (tags-todo "SBUS")
                 (tags-todo "ETC"))))))
 
 
 (setq org-capture-templates
       (quote (("t" "todo" entry (file "~/org/refile.org")
                "* TODO %?\n\n")
-              ("s" "mm todo" entry (file "~/org/refile.org")
-               "* TODO %? :MM:\n\n")
              ("r" "respond" entry (file "~/org/refile.org")
                "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n\n")
               ("n" "note" entry (file "~/org/refile.org")
@@ -93,20 +96,24 @@
                "* TODO Review %c\n\n")
               ("m" "Meeting" entry (file "~/org/refile.org")
                "* MEETING with %? :MEETING:\n")
-;;              ("p" "Phone call" entry (file "~/org/refile.org")
-;;               "* PHONE %? :PHONE:\n")
               ("i" "Idea " entry (file+datetree "~/org/idea.org")
                "* IDEA %? :IDEA:\n")
               ("h" "Habit" entry (file "~/org/refile.org")
                "* NEXT %?\n\n%a\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
 
-(setq org-refile-targets (quote (("gtd.org" :maxlevel . 1) 
+(setq org-refile-targets (quote (("gtd.org" :maxlevel . 1)
                              ("someday.org" :level . 2))))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((dot . t))) ; this line activates dot
+
 
 ;;--------------------------------------------------------------------------------
 ;; scratchの初期メッセージ
 ;;--------------------------------------------------------------------------------
-(setq initial-scratch-message "Done is better than perfect, datte.")
+(setq initial-scratch-message "HOGE")
+
 
 ;;--------------------------------------------------------------------------------
 ;; Package manager
@@ -143,6 +150,7 @@
     auto-complete
     anything
 ;    gtags
+    helm
     ))
 
 (require 'cl)
@@ -150,7 +158,6 @@
           (when (not (package-installed-p x))
             (package-install x)))
         my-packages)
-
 
 (require 'auto-install)
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/auto-install/"))
@@ -162,11 +169,10 @@
 ;; 外観
 ;;--------------------------------------------------------------------------------
 (add-to-list 'load-path
-             (expand-file-name "~/.emacs.d/elpa/zenburn-theme-20130523.1753/'"))
-;(require 'color-theme)
-;(color-theme-initialize)
-;(color-theme-zenburn)
-(load-theme 'zenburn t)
+             (expand-file-name "~/.emacs.d/elpa/zenburn-theme-20140811.754/'"))
+
+(when window-system
+  (load-theme 'zenburn t))
 ;; 画面透過
 (set-frame-parameter nil 'alpha 95)
 (setq frame-title-format (format "%%f - Emacs@%s" (system-name)))
@@ -187,6 +193,9 @@
 (if (eq system-type 'windows-nt) (load "~/.emacs.d/init_windows.el")
   (if (eq system-type 'darwin) (load "~/.emacs.d/init_mac.el")
       (load "~/.emacs.d/init_linux.el")))
+
+;; ホスト毎の設定ファイル
+(load (locate-user-emacs-file (concat "init_" (replace-regexp-in-string "\\..*" "" (system-name)))) t)
 
 
 ;;--------------------------------------------------------------------------------
@@ -229,7 +238,7 @@
  '(inhibit-startup-screen t)
  '(make-backup-files nil)
  '(menu-bar-mode nil)
- '(org-agenda-files (quote ("~/org/gtd.org_archive" "/home/tatezono/org/gtd.org" "/home/tatezono/org/idea.org" "/home/tatezono/org/journal.org" "/home/tatezono/org/refile.org")))
+ '(org-agenda-files (quote ("~/org/memory.org" "~/org/pat.org" "~/org/gtd.org_archive" "~/org/gtd.org" "~/org/idea.org" "~/org/journal.org" "~/org/refile.org")))
  '(scroll-bar-mode nil)
  '(show-paren-mode t)
  '(tool-bar-mode nil)
@@ -243,27 +252,6 @@
 (display-time)                  ; 現在時刻
 (column-number-mode t)          ; 行数表示
 (which-function-mode t)         ; 現在の関数名
-;(add-to-list 'load-path
-;             (expand-file-name "~/.emacs.d/elpa/powerline-20130511.1749/'"))
-;(require 'powerline)
-;(powerline-center-theme)
-
-
-;; ;;--------------------------------------------------------------------------------
-;; ;; popwin 設定
-;; ;;--------------------------------------------------------------------------------
-
-;; 重いので使わないことにした 2013.11.01
-;; (setq pop-up-windows nil)
-;; (require 'popwin nil t)
-;; (when (require 'popwin nil t)
-;;   (setq popwin:popup-window-position 'bottom)    ; 表示位置
-;;   (setq anything-samewindow nil)
-;;   (setq display-buffer-function 'popwin:display-buffer)
-;;   (push '("anything" :regexp t :height 0.5) popwin:special-display-config)
-;;   (push '("*Completions*" :height 0.4) popwin:special-display-config)
-;;   (push '("*compilation*" :height 0.4 :noselect t :stick t) popwin:special-display-config)
-;;   )
 
 
 ;;--------------------------------------------------------------------------------
@@ -308,11 +296,12 @@
                              (yank)
                              (indent-region (region-beginning) (region-end))))
 
+
 ;;--------------------------------------------------------------------------------
 ;; auto-complete
 ;;--------------------------------------------------------------------------------
 (require 'auto-complete)
-(require 'auto-complete-config)    ; 必須ではないですが一応
+(require 'auto-complete-config)
 (global-auto-complete-mode t)
 (setq ac-use-menu-map t)           ;補完候補をC-n/C-p で選択
 
@@ -481,26 +470,20 @@
 (global-set-key "\C-h" 'delete-backward-char); 削除をC-hで
 
 
-
 ;;--------------------------------------------------------------------------------
 ;; 検索
 ;;--------------------------------------------------------------------------------
 (global-hi-lock-mode 1)
 (require 'wgrep nil t)
+(global-set-key "\C-cr" 'rgrep)
+
 
 ;;--------------------------------------------------------------------------------
-;; anything
+;; Auto-Complete
 ;;--------------------------------------------------------------------------------
-(require 'anything-startup)
-(add-to-list 'anything-sources 'anything-c-source-emacs-commands)
-(global-set-key (kbd "C-x ;") 'anything)
-(global-set-key (kbd "C-'") 'anything)
-(define-key global-map (kbd "M-x")
-  (lambda ()
-    "Execute emacs commands in anything"
-    (interactive)
-    (anything '(anything-c-source-emacs-commands))))
-(setq anything-idle-delay 0.1)
+(require 'auto-complete)
+(require 'auto-complete-config)    ; 必須ではないですが一応
+(global-auto-complete-mode t)
 
 
 ;;--------------------------------------------------------------------------------
@@ -547,7 +530,8 @@
 (add-hook 'c-mode-hook
           (lambda ()
             (font-lock-add-keywords nil
-                                    '(("^[^\n]\\{100\\}\\(.*\\)$" 1 font-lock-warning-face t)))
+                                    '(("^[^\n]\\{100\\}\\(.*\\)$" 1 "gray" t)))
+;;                                    '(("^[^\n]\\{100\\}\\(.*\\)$" 1 font-lock-warning-face t)))
             (setq show-trailing-whitespace t)))
 
 
@@ -579,37 +563,6 @@
 ;; ;  (show-space4-indent)
 ;;   (message "[NOTICE] set indent style: TAB"))
 
-;; [F11] でバッファ全体のインデントをスペース化
-;(define-key global-map [f11] 'untabify-and-indent-whole-buffer)
-;(defun untabify-and-indent-whole-buffer ()
-;  (interactive)
-;  (indent-region (point-min) (point-max))
-;  (untabify (point-min) (point-max))
-;  (message "[NOTICE] all indent was converted to SPACE"))
-
-;; [F12] コード整形モード
-;; 以下の箇所でwarningを出す
-;; ・TABの使用
-;; ・1行で80文字以上
-;; ・行末の警告
-;; (define-key global-map [f12] 'tabify-and-indent-whole-buffer)
-;; (defun tabify-and-indent-whole-buffer ()
-;;   (interactive)
-;;   (add-hook 'c-mode-hook
-;;             (lambda ()
-;;               (flymake-mode t)
-;;               (font-lock-add-keywords nil
-;;                                       '(("^[^\n]\\{80\\}\\(.*\\)$" 1 font-lock-warning-face t)))
-;;               (font-lock-add-keywords major-mode '(
-;;                                                    ("\\<if\\>"
-;;                                                     ("[^<>=]\\(=\\)[^=]" nil nil (1 font-lock-warning-face))
-;;                                                     )))
-
-;;   ))
-;;   (c-mode)
-;;   (show-tab-indent)
-;;   (message "[NOTICE] code checking mode"))
-
 
 ;; 日付の挿入
 (define-key global-map [f5]
@@ -622,11 +575,6 @@
      (interactive)
      (insert (format-time-string "%m/%d(%a)"))))
 
-;; 署名の挿入
-(define-key global-map [f6]
-  '(lambda ()
-     (interactive)
-     (insert "zonomasa")))
 
 ;;--------------------------------------------------------------------------------
 ;; C-eldoc
@@ -644,52 +592,50 @@
 ;;--------------------------------------------------------------------------------
 ;; http://d.hatena.ne.jp/mmitou/20120604/1338828611
 ;; http://d.hatena.ne.jp/pyopyopyo/20070715/
-(require 'flymake)
 
-;; Flymake のログレベルを上げる。*Messages* で確認
-(setq flymake-log-level 3)
+;; (require 'flymake)
 
-;; c-mode に登録
-;(add-hook 'c-mode-hook
-;          (lambda ()
-;            (flymake-mode t)
-;            ))
+;; ;; Flymake のログレベルを上げる。*Messages* で確認
+;; (setq flymake-log-level 3)
 
- (defun flymake-get-make-cmdline (source base-dir)
-   (list "make"
-         (list  "PCLINUX=yes" "-C"
-                (concat base-dir "src")
-               (concat "CHK_SOURCES=../" source)
-;;               "SYNTAX_CHECK_MODE=1"
-               "check-syntax")))
+;; ;; c-mode に登録
+;; (add-hook 'c-mode-hook
+;;           (lambda ()
+;;             (flymake-mode t)
+;;             ))
+
+;;  (defun flymake-get-make-cmdline (source base-dir)
+;;    (list "make"
+;;          (list  "PCLINUX=yes" "-C"
+;;                 (concat base-dir "src")
+;;                (concat "CHK_SOURCES=../" source)
+;; ;;               "SYNTAX_CHECK_MODE=1"
+;;                "check-syntax")))
 
 
-(defadvice flymake-post-syntax-check (before flymake-force-check-was-interrupted)
-  (setq flymake-check-was-interrupted t))
-(ad-activate 'flymake-post-syntax-check)
+;; (defadvice flymake-post-syntax-check (before flymake-force-check-was-interrupted)
+;;   (setq flymake-check-was-interrupted t))
+;; (ad-activate 'flymake-post-syntax-check)
 
-;;エラーメッセージをミニバッファで表示させる
-(global-set-key "\M-n" 'flymake-goto-next-error)
-(global-set-key "\M-p" 'flymake-goto-prev-error)
-(setq flymake-run-in-place nil)
-(setq flymake-run-in-place t)
-;; gotoした際にエラーメッセージをminibufferに表示する
-(defun display-error-message ()
-  (message (get-char-property (point) 'help-echo)))
-(defadvice flymake-goto-prev-error (after flymake-goto-prev-error-display-message)
-  (display-error-message))
-(defadvice flymake-goto-next-error (after flymake-goto-next-error-display-message)
-  (display-error-message))
-(ad-activate 'flymake-goto-prev-error 'flymake-goto-prev-error-display-message)
-(ad-activate 'flymake-goto-next-error 'flymake-goto-next-error-display-message)
+;; ;;エラーメッセージをミニバッファで表示させる
+;; (global-set-key "\M-n" 'flymake-goto-next-error)
+;; (global-set-key "\M-p" 'flymake-goto-prev-error)
+;; (setq flymake-run-in-place nil)
+;; (setq flymake-run-in-place t)
+;; ;; gotoした際にエラーメッセージをminibufferに表示する
+;; (defun display-error-message ()
+;;   (message (get-char-property (point) 'help-echo)))
+;; (defadvice flymake-goto-prev-error (after flymake-goto-prev-error-display-message)
+;;   (display-error-message))
+;; (defadvice flymake-goto-next-error (after flymake-goto-next-error-display-message)
+;;   (display-error-message))
+;; (ad-activate 'flymake-goto-prev-error 'flymake-goto-prev-error-display-message)
+;; (ad-activate 'flymake-goto-next-error 'flymake-goto-next-error-display-message)
 
 
 ;;--------------------------------------------------------------------------------
 ;; yasnippet
 ;;--------------------------------------------------------------------------------
-
-(add-to-list 'load-path
-             (expand-file-name "~/.emacs.d/elpa/yasnippet/'"))
 (require 'yasnippet)
 (add-to-list 'load-path
              (expand-file-name "~/.emacs.d/elpa/dropdown-list/'"))
@@ -718,55 +664,6 @@
 
 
 ;;--------------------------------------------------------------------------------
-;; GNU global(gtags.el)
-;;--------------------------------------------------------------------------------
-(when (require 'gtags nil t)
-  (require 'anything-gtags)
-  (setq gtags-path-style 'relative)
-  (global-set-key "\M-t" 'gtags-find-tag)     ;関数の定義元へ
-  (global-set-key "\M-r" 'gtags-find-rtag)    ;関数の参照先へ
-  (global-set-key "\M-s" 'gtags-find-symbol)  ;変数の定義元/参照先へ
-                                        ;(global-set-key "\M-f" 'gtags-find-file)   ;ファイルにジャンプ
-  (global-set-key "\C-t" 'gtags-pop-stack)   ;前のバッファに戻る
-  (global-set-key "\C-cf" 'gtags-parse-file2)   ;前のバッファに戻る
-  (add-hook 'c-mode-common-hook
-            '(lambda ()
-               (gtags-mode 1)))
-
-  ;; update GTAGS
-  (defun update-gtags (&optional prefix)
-    (interactive "P")
-    (let ((rootdir (gtags-get-rootpath))
-          (args (if prefix "-v" "-iv")))
-      (when rootdir
-        (let* ((default-directory rootdir)
-               (buffer (get-buffer-create "*update GTAGS*")))
-          (save-excursion
-            (set-buffer buffer)
-            (erase-buffer)
-            (let ((result (process-file "gtags" nil buffer nil args)))
-              (if (= 0 result)
-                  (message "GTAGS successfully updated.")
-                (message "update GTAGS error with exit status %d" result))))))))
-  (add-hook 'after-save-hook 'update-gtags)
-  (defun gtags-parse-file2 ()
-    (interactive)
-    (if (gtags-get-rootpath)
-        (let*
-            ((root (gtags-get-rootpath))
-             (path (buffer-file-name))
-             (gtags-path-style 'root)
-             (gtags-rootdir root))
-          (if (string-match (regexp-quote root) path)
-              (gtags-goto-tag
-               (replace-match "" t nil path)
-               "f" nil)
-            ;; delegate to gtags-parse-file
-            (gtags-parse-file)))
-      ;; delegate to gtags-parse-file
-      (gtags-parse-file)))
-)
-;;--------------------------------------------------------------------------------
 ;; Markdown-mode
 ;;--------------------------------------------------------------------------------
 (setq auto-mode-alist (cons '("\\.md" . gfm-mode) auto-mode-alist))
@@ -789,7 +686,6 @@
 ;; 独自関数の定義
 ;;--------------------------------------------------------------------------------
 ;; インデントにスペース4を使っている場合に表示する
-;; 使用しなくなった
 (defun show-space4-indent ()
   (defadvice font-lock-mode (before my-font-lock-mode ())
     (font-lock-add-keywords
@@ -817,8 +713,10 @@
  )
 
 
-
+;;--------------------------------------------------------------------------------
+;; ac-mozc
 ;; https://github.com/narusemotoki/.emacs.d/tree/master/elisp/ac-mozc
+;;--------------------------------------------------------------------------------
 (require 'ac-mozc)
 (define-key ac-mode-map (kbd "C-c C-SPC") 'ac-mozc-complete)
 (require 'org)
@@ -847,3 +745,91 @@
 
 (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+
+;;--------------------------------------------------------------------------------
+;; undo-tree
+;;--------------------------------------------------------------------------------
+(require 'undo-tree)
+(global-undo-tree-mode t)
+(global-set-key (kbd "M-/") 'undo-tree-redo)
+
+
+;;--------------------------------------------------------------------------------
+;; デフォルト文字コード
+;; 冒頭に書くと何者かによって設定が上書きされてしまう。
+;;--------------------------------------------------------------------------------
+(set-default-coding-systems 'utf-8)
+
+
+;;--------------------------------------------------------------------------------
+;; Helm
+;; http://d.hatena.ne.jp/a_bicky/20140104/1388822688
+;;--------------------------------------------------------------------------------
+(when (require 'helm-config nil t)
+  (helm-mode 1)
+
+  (define-key global-map (kbd "M-x")     'helm-M-x)
+  (define-key global-map (kbd "C-x C-f") 'helm-find-files)
+  (define-key global-map (kbd "C-x C-r") 'helm-recentf)
+  (define-key global-map (kbd "M-y")     'helm-show-kill-ring)
+  (define-key global-map (kbd "C-c i")   'helm-imenu)
+  (define-key global-map (kbd "C-x ;")   'helm-mini)
+  (define-key global-map (kbd "C-x b")   'helm-buffers-list)
+
+
+  (define-key helm-map (kbd "C-h") 'delete-backward-char)
+  (define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)
+  (define-key helm-c-read-file-map (kbd "C-h") 'delete-backward-char)
+  (define-key helm-find-files-map (kbd "TAB") 'helm-execute-persistent-action)
+  (define-key helm-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
+
+  ;; Disable helm in some functions
+  (add-to-list 'helm-completing-read-handlers-alist '(find-alternate-file . nil))
+
+  ;; Emulate `kill-line' in helm minibuffer
+  (setq helm-delete-minibuffer-contents-from-point t)
+  (defadvice helm-delete-minibuffer-contents (before helm-emulate-kill-line activate)
+    "Emulate `kill-line' in helm minibuffer"
+    (kill-new (buffer-substring (point) (field-end))))
+
+  (defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
+    "Execute command only if CANDIDATE exists"
+    (when (file-exists-p candidate)
+      ad-do-it))
+
+  (defadvice helm-ff-transform-fname-for-completion (around my-transform activate)
+    "Transform the pattern to reflect my intention"
+    (let* ((pattern (ad-get-arg 0))
+           (input-pattern (file-name-nondirectory pattern))
+           (dirname (file-name-directory pattern)))
+      (setq input-pattern (replace-regexp-in-string "\\." "\\\\." input-pattern))
+      (setq ad-return-value
+            (concat dirname
+                    (if (string-match "^\\^" input-pattern)
+                        ;; '^' is a pattern for basename
+                        ;; and not required because the directory name is prepended
+                        (substring input-pattern 1)
+                      (concat ".*" input-pattern))))))
+
+
+  (when (require 'helm-c-moccur nil t)
+    (global-set-key (kbd "M-o") 'helm-c-moccur-occur-by-moccur)
+    (global-set-key (kbd "C-M-o") 'helm-c-moccur-dmoccur)
+    (add-hook 'dired-mode-hook
+              '(lambda ()
+                 (local-set-key (kbd "O") 'helm-c-moccur-dired-do-moccur-by-moccur)))
+    (global-set-key (kbd "C-M-s") 'helm-c-moccur-isearch-forward)
+    (global-set-key (kbd "C-M-r") 'helm-c-moccur-isearch-backward))
+  (when (require 'helm-gtags nil t)
+    (add-hook 'helm-gtags-mode-hook
+              '(lambda ()
+                 (local-set-key (kbd "M-t") 'helm-gtags-find-tag)
+                 (local-set-key (kbd "M-r") 'helm-gtags-find-rtag)
+                 (local-set-key (kbd "M-s") 'helm-gtags-find-symbol)
+                 (local-set-key (kbd "C-t") 'helm-gtags-pop-stack)
+                 (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)
+                 (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
+                 ))
+    (add-hook 'c-mode-hook 'helm-gtags-mode))
+
+)

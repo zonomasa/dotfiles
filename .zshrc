@@ -1,5 +1,15 @@
 #source $HOME/.zshrc.antigen
 
+## autojump
+## https://github.com/joelthelion/autojump
+
+[[ -s /home/tatezono/.autojump/etc/profile.d/autojump.sh ]] && source /home/tatezono/.autojump/etc/profile.d/autojump.sh
+
+autoload -U compinit && compinit -u
+
+
+export PATH=$PATH:/usr/local/go/bin
+export GOPATH=/home/tatezono/gocode
 
 #http://bbeausej.tumblr.com/post/904302239/osx-bash-in-256-colors-my-zenburn-like-ls-colors
 export LS_COLORS='di=38;5;108:fi=00:*svn-commit.tmp=31:ln=38;5;116:ex=38;5;186'

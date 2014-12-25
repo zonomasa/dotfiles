@@ -18,6 +18,13 @@ export PERL_CPANM_OPT="--local-lib=~/perl5"
 export PATH=$HOME/perl5/bin:$PATH;
 export PERL5LIB=$HOME/perl5/lib/perl5:$PERL5LIB;
 
+## RED と打つと標準エラーが赤になる
+function redrev() {
+    perl -pe 's/^/\e[41m/ && s/$/\e[m/';
+}
+
+alias -g RED='2> >(redrev)'
+
 
 ## 印刷コマンド
 #
@@ -78,7 +85,8 @@ alias ls="ls -G -w"
 ;;
 linux*)
 alias ls="ls --color"
-alias e='/usr/bin/emacsclient'
+alias e='XMODIFIERS= /usr/bin/emacsclient'
+alias emacs='XMODIFIERS= /usr/bin/emacs'
 ;;
 cygwin*)
 alias ls="ls --color"
