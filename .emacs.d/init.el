@@ -7,6 +7,8 @@
 ;(if window-system (progn
 ;                      (server-start)))
 (require 'server)
+(defun server-ensure-safe-dir (dir) "Noop" t)
+(setq server-socket-dir "~/.emacs.d")
 (unless (server-running-p)
   (server-start))
 
@@ -148,10 +150,11 @@
     c-eldoc
     auto-install
     auto-complete
-    anything
     helm
     multi-term
     undo-tree
+    helm-gtags
+    helm-c-moccur
     ))
 
 (require 'cl)
@@ -160,10 +163,10 @@
             (package-install x)))
         my-packages)
 
-(require 'auto-install)
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/auto-install/"))
-(auto-install-update-emacswiki-package-name t)
-(auto-install-compatibility-setup)
+;(require 'auto-install)
+;(add-to-list 'load-path (expand-file-name "~/.emacs.d/auto-install/"))
+;(auto-install-update-emacswiki-package-name t)
+;(auto-install-compatibility-setup)
 
 
 ;;--------------------------------------------------------------------------------
@@ -192,8 +195,10 @@
 ;; 環境依存のファイル読み込み
 ;;--------------------------------------------------------------------------------
 (if (eq system-type 'windows-nt) (load "~/.emacs.d/init_windows.el")
-  (if (eq system-type 'darwin) (load "~/.emacs.d/init_mac.el")
-      (load "~/.emacs.d/init_linux.el")))
+  (if (eq system-type 'cygwin) (load "~/.emacs.d/init_windows.el")
+    (if (eq system-type 'darwin) (load "~/.emacs.d/init_mac.el")
+      (load "~/.emacs.d/init_linux.el"))))
+
 
 ;; ホスト毎の設定ファイル
 (load (locate-user-emacs-file (concat "init_" (replace-regexp-in-string "\\..*" "" (system-name)))) t)
@@ -251,8 +256,43 @@
 ;; モードライン
 ;;--------------------------------------------------------------------------------
 (display-time)                  ; 現在時刻
-(column-number-mode t)          ; 行数表示
+(column-number-mode t)          ; 列数表示
 (which-function-mode t)         ; 現在の関数名
+
+
+(defvar mode-line-cleaner-alist
+  '( ;; For minor-mode, first char is 'space'
+    (yas-minor-mode . "")
+    (eldoc-mode . "")
+    (abbrev-mode . "")
+    (undo-tree-mode . "")
+    (undo-tree-mode . "")
+    (helm-gtags-mode . " HG")
+    (flymake-mode . " Fm")
+    (auto-complete-mode . "")
+    (helm-mode . "")
+    ;; Major modes
+    (lisp-interaction-mode . "Li")
+    (python-mode . "P/l")
+    (ruby-mode   . "R/l")
+    (emacs-lisp-mode . "E/l")
+    (markdown-mode . "M/d")))
+
+(defun clean-mode-line ()
+  (interactive)
+  (loop for (mode . mode-str) in mode-line-cleaner-alist
+        do
+        (let ((old-mode-str (cdr (assq mode minor-mode-alist))))
+          (when old-mode-str
+            (setcar old-mode-str mode-str))
+          ;; major mode
+          (when (eq mode major-mode)
+            (setq mode-name mode-str)))))
+
+(add-hook 'after-change-major-mode-hook 'clean-mode-line)
+
+
+
 
 
 ;;--------------------------------------------------------------------------------
@@ -480,8 +520,7 @@
 
 (add-hook 'c-mode-common-hook
           '(lambda ()
-             (local-set-key [f12] 'compile)
-             (gtags-mode 1)))
+             (local-set-key [f12] 'compile)))
 
 
 
