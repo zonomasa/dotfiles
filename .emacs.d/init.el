@@ -155,6 +155,7 @@
     undo-tree
     helm-gtags
     helm-c-moccur
+    ac-mozc
     ))
 
 (require 'cl)
