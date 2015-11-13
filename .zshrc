@@ -7,9 +7,12 @@
 
 autoload -U compinit && compinit -u
 
-
+# for GO
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=/home/tatezono/gocode
+
+# for docker
+export NO_PROXY=/var/run/docker.sock
 
 #http://bbeausej.tumblr.com/post/904302239/osx-bash-in-256-colors-my-zenburn-like-ls-colors
 export LS_COLORS='di=38;5;108:fi=00:*svn-commit.tmp=31:ln=38;5;116:ex=38;5;186'
@@ -184,4 +187,3 @@ export HISTSIZE=10000
 
 # 履歴ファイルに保存される履歴の件数
 export SAVEHIST=100000
-

@@ -155,6 +155,7 @@
     undo-tree
     helm-gtags
     helm-c-moccur
+    ac-mozc
     ))
 
 (require 'cl)
@@ -179,7 +180,7 @@
   (load-theme 'zenburn t))
 ;; 画面透過
 (set-frame-parameter nil 'alpha 95)
-(setq frame-title-format (format "%%f - Emacs@%s" (system-name)))
+(setq frame-title-format (format "%%f - えーまくす@%s" (system-name)))
 
 ;; IME OFF時の初期カーソルカラー
 (set-cursor-color "dark cyan")
@@ -518,9 +519,10 @@
 ;; GDB
 (load "~/.emacs.d/elisp/gdb.el")
 
-(add-hook 'c-mode-common-hook
-          '(lambda ()
-             (local-set-key [f12] 'compile)))
+;;(add-hook 'c-mode-common-hook
+;;          '(lambda ()
+             (global-set-key [f12] 'compile)
+;;))
 
 
 
@@ -857,3 +859,50 @@
     (add-hook 'c-mode-hook 'helm-gtags-mode))
 
 )
+
+;;--------------------------------------------------------------------------------
+;; ACE-JUMP
+;;--------------------------------------------------------------------------------
+;; ヒント文字に使う文字を指定する
+(setq ace-jump-mode-move-keys
+      (append "asdfghjkl;:]qwertyuiop@zxcvbnm,." nil))
+;; ace-jump-word-modeのとき文字を尋ねないようにする
+(setq ace-jump-word-mode-use-query-char nil)
+(global-set-key (kbd "C-<") 'ace-jump-char-mode)
+(global-set-key (kbd "C->") 'ace-jump-word-mode)
+(global-set-key (kbd "C-M-<") 'ace-jump-line-mode)
+
+
+
+
+;(require 'helm-swoop)
+
+;; Save buffer when helm-multi-swoop-edit complete
+;(setq helm-multi-swoop-edit-save t)
+
+;; 値がtの場合はウィンドウ内に分割、nilなら別のウィンドウを使用
+;(setq helm-swoop-split-with-multiple-windows nil)
+
+;; ウィンドウ分割方向 'split-window-vertically or 'split-window-horizontally
+;(setq helm-swoop-split-direction 'split-window-vertically)
+
+;; nilなら一覧のテキストカラーを失う代わりに、起動スピードをほんの少し上げる
+;(setq helm-swoop-speed-or-color t)
+
+
+
+
+;; ace-isearch
+;(global-ace-isearch-mode 1)
+
+;;--------------------------------------------------------------------------------
+;; recentf
+;;--------------------------------------------------------------------------------
+(when (require 'recentf nil t)
+  (setq recentf-max-saved-items 2000)
+  (setq recentf-exclude '(".recentf"))
+  (setq recentf-auto-cleanup 10)
+  (setq recentf-auto-save-timer
+        (run-with-idle-timer 30 t 'recentf-save-list))
+  (recentf-mode 1)
+  (require 'recentf-ext))

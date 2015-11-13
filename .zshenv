@@ -125,3 +125,20 @@ if [ -z "$HOME/.rvm/scripts/rvm" ];then
 fi
 
 if which rbenv > /dev/null; then eval "$(rbenv init - zsh)"; fi
+
+
+
+## ZAW の設定
+# git clone https://github.com/zsh-users/zaw.git
+# zaw-cdr はzsh のcdr を必要とする。これは5.0.3以上？で利用可能
+
+# cdr を使えるようにする
+#autoload -Uz add-zsh-hock
+autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
+
+source ~/github/zaw/zaw.zsh
+source ~/github/zaw/sources/cdr.zsh
+
+bindkey '^@' zaw-cdr
+bindkey '^R' zaw-history
+
