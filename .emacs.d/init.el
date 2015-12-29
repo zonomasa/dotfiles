@@ -20,7 +20,7 @@
 ;;--------------------------------------------------------------------------------
 ;; Following settings are from http://doc.norang.ca/org-mode.html#TasksAndStates
 
-(add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
+(add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\)$" . org-mode))
 (require 'org)
 
 ;; Standard key bindings
@@ -156,6 +156,7 @@
     helm-gtags
     helm-c-moccur
     ac-mozc
+    recentf-ext
     ))
 
 (require 'cl)
@@ -173,11 +174,10 @@
 ;;--------------------------------------------------------------------------------
 ;; 外観
 ;;--------------------------------------------------------------------------------
-(add-to-list 'load-path
-             (expand-file-name "~/.emacs.d/elpa/zenburn-theme-20140811.754/'"))
 
-(when window-system
-  (load-theme 'zenburn t))
+;(when window-system
+  (load-theme 'zenburn t)
+;)
 ;; 画面透過
 (set-frame-parameter nil 'alpha 95)
 (setq frame-title-format (format "%%f - えーまくす@%s" (system-name)))
@@ -238,6 +238,7 @@
  '(auto-save-list-file-name nil t)
  '(auto-save-list-file-prefix nil)
  '(column-number-mode t)
+ '(custom-safe-themes (quote ("f024aea709fb96583cf4ced924139ac60ddca48d25c23a9d1cd657a2cf1e4728" default)))
  '(delete-auto-save-files t)
  '(display-time-mode t)
  '(global-auto-revert-mode t)
@@ -245,7 +246,7 @@
  '(inhibit-startup-screen t)
  '(make-backup-files nil)
  '(menu-bar-mode nil)
- '(org-agenda-files (quote ("~/org/memory.org" "~/org/pat.org" "~/org/gtd.org_archive" "~/org/gtd.org" "~/org/idea.org" "~/org/journal.org" "~/org/refile.org")))
+ '(org-agenda-files (quote ("~/org/gtd.org_archive" "~/org/gtd.org" "~/org/idea.org" "~/org/journal.org" "~/org/refile.org")))
  '(scroll-bar-mode nil)
  '(show-paren-mode t)
  '(tool-bar-mode nil)
@@ -291,9 +292,6 @@
             (setq mode-name mode-str)))))
 
 (add-hook 'after-change-major-mode-hook 'clean-mode-line)
-
-
-
 
 
 ;;--------------------------------------------------------------------------------
@@ -508,7 +506,7 @@
 ;; Auto-Complete
 ;;--------------------------------------------------------------------------------
 (require 'auto-complete)
-(require 'auto-complete-config)    ; 必須ではないですが一応
+(require 'auto-complete-config)
 (global-auto-complete-mode t)
 
 
@@ -614,52 +612,6 @@
 
 
 ;;--------------------------------------------------------------------------------
-;; Flymakeの設定
-;;--------------------------------------------------------------------------------
-;; http://d.hatena.ne.jp/mmitou/20120604/1338828611
-;; http://d.hatena.ne.jp/pyopyopyo/20070715/
-
-;; (require 'flymake)
-
-;; ;; Flymake のログレベルを上げる。*Messages* で確認
-;; (setq flymake-log-level 3)
-
-;; ;; c-mode に登録
-;; (add-hook 'c-mode-hook
-;;           (lambda ()
-;;             (flymake-mode t)
-;;             ))
-
-;;  (defun flymake-get-make-cmdline (source base-dir)
-;;    (list "make"
-;;          (list  "PCLINUX=yes" "-C"
-;;                 (concat base-dir "src")
-;;                (concat "CHK_SOURCES=../" source)
-;; ;;               "SYNTAX_CHECK_MODE=1"
-;;                "check-syntax")))
-
-
-;; (defadvice flymake-post-syntax-check (before flymake-force-check-was-interrupted)
-;;   (setq flymake-check-was-interrupted t))
-;; (ad-activate 'flymake-post-syntax-check)
-
-;; ;;エラーメッセージをミニバッファで表示させる
-;; (global-set-key "\M-n" 'flymake-goto-next-error)
-;; (global-set-key "\M-p" 'flymake-goto-prev-error)
-;; (setq flymake-run-in-place nil)
-;; (setq flymake-run-in-place t)
-;; ;; gotoした際にエラーメッセージをminibufferに表示する
-;; (defun display-error-message ()
-;;   (message (get-char-property (point) 'help-echo)))
-;; (defadvice flymake-goto-prev-error (after flymake-goto-prev-error-display-message)
-;;   (display-error-message))
-;; (defadvice flymake-goto-next-error (after flymake-goto-next-error-display-message)
-;;   (display-error-message))
-;; (ad-activate 'flymake-goto-prev-error 'flymake-goto-prev-error-display-message)
-;; (ad-activate 'flymake-goto-next-error 'flymake-goto-next-error-display-message)
-
-
-;;--------------------------------------------------------------------------------
 ;; yasnippet
 ;;--------------------------------------------------------------------------------
 (require 'yasnippet)
@@ -692,7 +644,8 @@
 ;;--------------------------------------------------------------------------------
 ;; Markdown-mode
 ;;--------------------------------------------------------------------------------
-(setq auto-mode-alist (cons '("\\.md" . gfm-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.\\(md\\|txt\\)$" . gfm-mode) auto-mode-alist))
+
 
 ;;--------------------------------------------------------------------------------
 ;; 独自変数の定義
@@ -805,7 +758,7 @@
 
   (define-key helm-map (kbd "C-h") 'delete-backward-char)
   (define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)
-  (define-key helm-c-read-file-map (kbd "C-h") 'delete-backward-char)
+;;  (define-key helm-c-read-file-map (kbd "C-h") 'delete-backward-char)
   (define-key helm-find-files-map (kbd "TAB") 'helm-execute-persistent-action)
   (define-key helm-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
 
@@ -857,7 +810,6 @@
                  (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
                  ))
     (add-hook 'c-mode-hook 'helm-gtags-mode))
-
 )
 
 ;;--------------------------------------------------------------------------------
@@ -873,30 +825,8 @@
 (global-set-key (kbd "C-M-<") 'ace-jump-line-mode)
 
 
-
-
-;(require 'helm-swoop)
-
-;; Save buffer when helm-multi-swoop-edit complete
-;(setq helm-multi-swoop-edit-save t)
-
-;; 値がtの場合はウィンドウ内に分割、nilなら別のウィンドウを使用
-;(setq helm-swoop-split-with-multiple-windows nil)
-
-;; ウィンドウ分割方向 'split-window-vertically or 'split-window-horizontally
-;(setq helm-swoop-split-direction 'split-window-vertically)
-
-;; nilなら一覧のテキストカラーを失う代わりに、起動スピードをほんの少し上げる
-;(setq helm-swoop-speed-or-color t)
-
-
-
-
-;; ace-isearch
-;(global-ace-isearch-mode 1)
-
 ;;--------------------------------------------------------------------------------
-;; recentf
+;; recentf-ext
 ;;--------------------------------------------------------------------------------
 (when (require 'recentf nil t)
   (setq recentf-max-saved-items 2000)
