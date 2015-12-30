@@ -836,3 +836,13 @@
         (run-with-idle-timer 30 t 'recentf-save-list))
   (recentf-mode 1)
   (require 'recentf-ext))
+
+
+;;--------------------------------------------------------------------------------
+;; Markdown mode
+;;--------------------------------------------------------------------------------
+; インデント動作がおかしい対策
+; http://blog.shibayu36.org/entry/2015/08/04/190956
+(add-hook 'markdown-mode-hook
+          '(lambda ()
+             (electric-indent-local-mode -1)))
