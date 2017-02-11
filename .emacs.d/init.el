@@ -73,15 +73,10 @@
               ("h" "(Home)Agenda and Lists with context"
                ((agenda)
                 (tags-todo "COMPUTER")
-                (tags-todo "MANA")
-                (tags-todo "MA")
-                (tags-todo "NA")
                 (tags-todo "MONEY")
                 (tags-todo "READING")))
                 ("O" "(Office)Agenda and Lists with context"
                 ((agenda)
-                (tags-todo "SMM")
-                (tags-todo "SBUS")
                 (tags-todo "ETC"))))))
 
 
@@ -180,7 +175,7 @@
 ;)
 ;; 画面透過
 (set-frame-parameter nil 'alpha 95)
-(setq frame-title-format (format "%%f - えーまくす@%s" (system-name)))
+(setq frame-title-format (format "%%f - @%s" (system-name)))
 
 ;; IME OFF時の初期カーソルカラー
 (set-cursor-color "dark cyan")
@@ -238,7 +233,9 @@
  '(auto-save-list-file-name nil t)
  '(auto-save-list-file-prefix nil)
  '(column-number-mode t)
- '(custom-safe-themes (quote ("f024aea709fb96583cf4ced924139ac60ddca48d25c23a9d1cd657a2cf1e4728" default)))
+ '(custom-safe-themes
+   (quote
+    ("f024aea709fb96583cf4ced924139ac60ddca48d25c23a9d1cd657a2cf1e4728" default)))
  '(delete-auto-save-files t)
  '(display-time-mode t)
  '(global-auto-revert-mode t)
@@ -246,7 +243,12 @@
  '(inhibit-startup-screen t)
  '(make-backup-files nil)
  '(menu-bar-mode nil)
- '(org-agenda-files (quote ("~/org/gtd.org_archive" "~/org/gtd.org" "~/org/idea.org" "~/org/journal.org" "~/org/refile.org")))
+ '(org-agenda-files
+   (quote
+    ("~/org/gtd.org_archive" "~/org/gtd.org" "~/org/idea.org" "~/org/journal.org" "~/org/refile.org")))
+ '(package-selected-packages
+   (quote
+    (recentf-ext ac-mozc helm-c-moccur helm-gtags undo-tree multi-term helm auto-complete auto-install c-eldoc cmake-mode color-moccur dropdown-list elscreen markdown-mode popup popwin tabbar wgrep yasnippet zenburn-theme)))
  '(scroll-bar-mode nil)
  '(show-paren-mode t)
  '(tool-bar-mode nil)
