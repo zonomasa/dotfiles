@@ -7,7 +7,7 @@ if [ -e "$HOME/.zshrc.dep" ];then
     source $HOME/.zshrc.dep
 fi
 
-
+PATH=$HOME/anaconda3/bin:$PATH
 PATH=$HOME/.rbenv/shims:$HOME/.rbenv/bin:$PATH
 
 if [ -e "$HOME/.rvm" ];then

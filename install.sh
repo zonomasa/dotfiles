@@ -1,7 +1,7 @@
 #!/bin/sh
 # expect dir structure : ~/dotfiles
 
-set -eu
+set -u
 
 ln -s ~/dotfiles/.emacs.d ~
 ln -s ~/dotfiles/.zshenv ~
