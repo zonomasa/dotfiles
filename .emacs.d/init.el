@@ -130,20 +130,17 @@
 
 
 (setq my-packages
-      '(
+'(
     zenburn-theme
-    yasnippet
     wgrep
     tabbar
     popwin
     popup
     markdown-mode
     elscreen
-    dropdown-list
     color-moccur
     cmake-mode
     c-eldoc
-    auto-install
     auto-complete
     helm
     multi-term
@@ -174,7 +171,7 @@
   (load-theme 'zenburn t)
 ;)
 ;; 画面透過
-(set-frame-parameter nil 'alpha 95)
+(set-frame-parameter nil 'alpha 96)
 (setq frame-title-format (format "%%f - @%s" (system-name)))
 
 ;; IME OFF時の初期カーソルカラー
@@ -248,13 +245,11 @@
     ("~/org/gtd.org_archive" "~/org/gtd.org" "~/org/idea.org" "~/org/journal.org" "~/org/refile.org")))
  '(package-selected-packages
    (quote
-    (recentf-ext ac-mozc helm-c-moccur helm-gtags undo-tree multi-term helm auto-complete auto-install c-eldoc cmake-mode color-moccur dropdown-list elscreen markdown-mode popup popwin tabbar wgrep yasnippet zenburn-theme)))
+    (recentf-ext ac-mozc helm-c-moccur helm-gtags undo-tree multi-term helm auto-complete auto-install c-eldoc cmake-mode color-moccur elscreen markdown-mode popup popwin tabbar wgrep zenburn-theme)))
  '(scroll-bar-mode nil)
  '(show-paren-mode t)
  '(tool-bar-mode nil)
- '(w32-symlinks-handle-shortcuts t)
- '(yas-trigger-key "TAB"))
-
+ '(w32-symlinks-handle-shortcuts t))
 
 ;;--------------------------------------------------------------------------------
 ;; モードライン
@@ -266,7 +261,6 @@
 
 (defvar mode-line-cleaner-alist
   '( ;; For minor-mode, first char is 'space'
-    (yas-minor-mode . "")
     (eldoc-mode . "")
     (abbrev-mode . "")
     (undo-tree-mode . "")
@@ -303,40 +297,6 @@
 (setq ediff-split-window-function 'split-window-horizontally)
 
 
-;;--------------------------------------------------------------------------------
-;; モード共通設定
-;;--------------------------------------------------------------------------------
-(global-font-lock-mode t)          ; 色付け
-(setq font-lock-maximum-decoration t) ; 色付けを最適化
-(setq fast-lock-cache-directories '("~/.emacs-flc" "."))
-(show-paren-mode t)                ; 対応する括弧をハイライト
-(setq show-paren-delay 0)          ; 表示までの秒数: 0秒
-(global-linum-mode t)              ; 行数表示
-
-;; キーワードのハイライト
-(defadvice font-lock-mode (before my-font-lock-mode2 ())
-  (font-lock-add-keywords
-   major-mode
-   '(
-     ("!" . font-lock-warning-face)          ; !
-;     ("[0-9]+" . font-lock-constant-face)    ; 数字
-     ("TODO" 0 my-face-todo append)          ; TODO
-     ("FIXME" 0 my-face-todo append)         ; FIXME
-     ("　" 0 my-face-zenkaku-s append)       ; 全角スペース
-     ("\t" 0 my-face-tab append)             ; タブ
-;    ("^    " 0 my-face-u-1 append)         ; スペース４インデント
-     ("[ ]+$" 0 my-face-endspace append)     ; 行末スペース
-     )))
-(ad-enable-advice 'font-lock-mode 'before 'my-font-lock-mode2)
-(ad-activate 'font-lock-mode)
-(add-hook 'find-file-hooks '(lambda ()
-                              (if font-lock-mode nil (font-lock-mode t))))
-
-;; 貼り付けた後インデントを行う
-(global-set-key [?\C-\S-y] (lambda ()
-                             (interactive)
-                             (yank)
-                             (indent-region (region-beginning) (region-end))))
 
 
 ;;--------------------------------------------------------------------------------
@@ -396,89 +356,6 @@
 
 
 ;;--------------------------------------------------------------------------------
-;; tabbar
-;;--------------------------------------------------------------------------------
-   (require 'tabbar)
-
-   ;; tabbar有効化
-   (tabbar-mode)
-
-   ;; タブ切替にマウスホイールを使用（0：有効，-1：無効）
-   (tabbar-mwheel-mode -1)
-
-   ;; タブグループを使用（t：有効，nil：無効）
-   (setq tabbar-buffer-groups-function nil)
-
-   ;; ボタン非表示
-   (dolist (btn '(tabbar-buffer-home-button
-                  tabbar-scroll-left-button
-                  tabbar-scroll-right-button))
-     (set btn (cons (cons "" nil) (cons "" nil))))
-
-   ;; タブ表示 一時バッファ一覧
-   (defvar tabbar-displayed-buffers
-     '("*Backtrace*" "*Colors*"
-       "*Faces*" "*Apropos*" "*Customize*" "*shell*" "*Help*")
-     "*Regexps matches buffer names always included tabs.")
-
-   ;; 作業バッファの一部を非表示
-   (setq tabbar-buffer-list-function
-         (lambda ()
-           (let* ((hides (list ?\  ?\*))
-                  (re (regexp-opt tabbar-displayed-buffers))
-                  (cur-buf (current-buffer))
-                  (tabs (delq
-                         nil
-                         (mapcar
-                          (lambda (buf)
-                            (let ((name (buffer-name buf)))
-                              (when (or (string-match re name)
-                                        (not (memq (aref name 0) hides)))
-                                buf)))
-                          (buffer-list)))))
-             (if (memq cur-buf tabs)
-                 tabs
-               (cons cur-buf tabs)))))
-
-   ;; キーバインド設定
-   (global-set-key (kbd "<C-tab>")   'tabbar-forward-tab)
-   (global-set-key (kbd "<C-S-tab>") 'tabbar-backward-tab)
-
-   ;; タブ表示欄の見た目（フェイス）
-   (set-face-attribute 'tabbar-default nil
-                       :background "SystemMenuBar")
-
-   ;; 選択タブの見た目（フェイス）
-   (set-face-attribute 'tabbar-selected nil
-                       :foreground "turquoise"
-                       :background "SystemMenuBar"
-;                       :box (list
-;                             :line-width 1
-;                             :color "gray80"
-;                             :style 'released-button)
-;                       :overline "#F3F2EF"
-;                       :weight 'bold
- ;                      :family "ＭＳ Ｐゴシック"
-                       )
-
-   ;; 非選択タブの見た目（フェイス）
-   (set-face-attribute 'tabbar-unselected nil
-                       :foreground "dark khaki"
-                       :background "SystemMenuBar"
-;                       :box (list
-;                             :line-width 1
-;                             :color "gray80"
-;                             :style 'released-button)
-;                       :overline "#F3F2EF"
-;                       :family "ＭＳ Ｐゴシック"
-                       )
-
-   ;; タブ間隔の調整
-   (set-face-attribute 'tabbar-separator t
-                       :height 0.5)
-
-;; https://github.com/dougalcorn/emacs.d/blob/master/elscreen-config.el
-;;--------------------------------------------------------------------------------
 ;; 操作（マウス）
 ;;--------------------------------------------------------------------------------
 (if window-system (progn
@@ -519,18 +396,13 @@
 ;; GDB
 (load "~/.emacs.d/elisp/gdb.el")
 
-;;(add-hook 'c-mode-common-hook
-;;          '(lambda ()
-             (global-set-key [f12] 'compile)
-;;))
-
-
+(global-set-key [f12] 'compile)
 
 ;; インデントのデフォルト設定
 (setq-default indent-tabs-mode nil)
 (setq c-default-style "k&r")
-(setq-default c-basic-offset 4)
-(setq-default tab-width 4)
+(setq-default c-basic-offset 2)
+(setq-default tab-width 2)
 
 
 (defadvice font-lock-mode (before my-font-lock-mode ())
@@ -613,40 +485,17 @@
             ))
 
 
-;;--------------------------------------------------------------------------------
-;; yasnippet
-;;--------------------------------------------------------------------------------
-(require 'yasnippet)
-(add-to-list 'load-path
-             (expand-file-name "~/.emacs.d/elpa/dropdown-list/'"))
-(require 'dropdown-list)
-(setq yas-prompt-functions '(yas-dropdown-prompt
-                             yas-ido-prompt
-                             yas-completing-prompt))
-
-(setq yas-snippet-dirs
-      '("~/.emacs.d/snippets"
-       "~/.emacs.d/elpa/yasnippet/snippets"))
-(yas-global-mode 1)
-
-
-;; 単語展開キーバインド (ver8.0から明記しないと機能しない)
-;; (setqだとtermなどで干渉問題ありでした)
-;; もちろんTAB以外でもOK 例えば "C-;"とか
-
-
-;; 既存スニペットを挿入する
-(define-key yas-minor-mode-map (kbd "C-x i i") 'yas-insert-snippet)
-;; 新規スニペットを作成するバッファを用意する
-(define-key yas-minor-mode-map (kbd "C-x i n") 'yas-new-snippet)
-;; 既存スニペットを閲覧・編集する
-(define-key yas-minor-mode-map (kbd "C-x i v") 'yas-visit-snippet-file)
-
 
 ;;--------------------------------------------------------------------------------
 ;; Markdown-mode
 ;;--------------------------------------------------------------------------------
 (setq auto-mode-alist (cons '("\\.\\(md\\|txt\\)$" . gfm-mode) auto-mode-alist))
+
+; インデント動作がおかしい対策
+; http://blog.shibayu36.org/entry/2015/08/04/190956
+(add-hook 'markdown-mode-hook
+          '(lambda ()
+             (electric-indent-local-mode -1)))
 
 
 ;;--------------------------------------------------------------------------------
@@ -684,15 +533,6 @@
                                     nil
                                   (font-lock-mode t))))
 )
-
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
 
 ;;--------------------------------------------------------------------------------
 ;; ac-mozc
@@ -843,8 +683,3 @@
 ;;--------------------------------------------------------------------------------
 ;; Markdown mode
 ;;--------------------------------------------------------------------------------
-; インデント動作がおかしい対策
-; http://blog.shibayu36.org/entry/2015/08/04/190956
-(add-hook 'markdown-mode-hook
-          '(lambda ()
-             (electric-indent-local-mode -1)))
