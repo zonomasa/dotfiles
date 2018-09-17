@@ -9,3 +9,8 @@ ln -s ~/dotfiles/.zshrc ~
 
 mkdir -p ~/github
 git clone https://github.com/zsh-users/zaw.git ~/github/zaw
+
+
+# when emacs, not use XIM
+echo "Emacs*useXIM: false" >> ~/.Xresources
+xrdb ~/.Xresources
